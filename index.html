@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Planner</title>
+    <link rel="icon" href="https://static.vecteezy.com/system/resources/previews/021/785/540/non_2x/indian-rupees-symbol-in-round-shape-indian-rupees-vector.jpg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: fadeIn 1s ease;
+        }
+
+        header {
+            background: #4caf50;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        section {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: #4caf50;
+        }
+
+        form label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        form input, form select, form button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        form button {
+            background: #4caf50;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        form button:hover {
+            background: #45a049;
+        }
+
+        .summary {
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        .summary span {
+            font-weight: bold;
+        }
+
+        .chart-section {
+            padding: 20px;
+            background: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container animate__animated animate__fadeIn">
+        <header>
+            <h1>Budget Planner</h1>
+        </header>
+        <main>
+            <section class="input-section">
+                <h2>Add Income/Expense</h2>
+                <form id="budget-form">
+                    <label for="type">Type:</label>
+                    <select id="type" name="type">
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" placeholder="E.g., expanses, Rent" required>
+
+                    <label for="amount">Amount (₹):</label>
+                    <input type="number" id="amount" name="amount" step="0.01" placeholder="Enter earning amount" required>
+
+                    <button type="submit">Add</button>
+                </form>
+            </section>
+
+            <section class="summary-section">
+                <h2>Summary</h2>
+                <div class="summary">
+                    <p>Total Income: <span id="total-income">₹0.00</span></p>
+                    <p>Total Expense: <span id="total-expense">₹0.00</span></p>
+                    <p>Balance: <span id="balance">₹0.00</span></p>
+                </div>
+            </section>
+
+            <section class="chart-section">
+                <h2>Financial Overview</h2>
+                <canvas id="budget-chart" width="400" height="200"></canvas>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const budgetForm = document.getElementById('budget-form');
+        const totalIncomeElement = document.getElementById('total-income');
+        const totalExpenseElement = document.getElementById('total-expense');
+        const balanceElement = document.getElementById('balance');
+        const ctx = document.getElementById('budget-chart').getContext('2d');
+
+        let totalIncome = 0;
+        let totalExpense = 0;
+        
+        const updateSummary = () => {
+            totalIncomeElement.textContent = `₹${totalIncome.toFixed(2)}`;
+            totalExpenseElement.textContent = `₹${totalExpense.toFixed(2)}`;
+            balanceElement.textContent = `₹${(totalIncome - totalExpense).toFixed(2)}`;
+            updateChart();
+        };
+
+        const budgetChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Income', 'Expenses'],
+                datasets: [{
+                    data: [totalIncome, totalExpense],
+                    backgroundColor: ['#4caf50', '#f44336'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                },
+            },
+        });
+
+        const updateChart = () => {
+            budgetChart.data.datasets[0].data = [totalIncome, totalExpense];
+            budgetChart.update();
+        };
+
+        budgetForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const type = document.getElementById('type').value;
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (type === 'income') {
+                totalIncome += amount;
+            } else if (type === 'expense') {
+                totalExpense += amount;
+            }
+
+            updateSummary();
+            budgetForm.reset();
+        });
+
+        updateSummary();
+    </script>
+</body>
+</html>
